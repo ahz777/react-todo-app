@@ -4,15 +4,18 @@ import { useWindowSize } from "react-use";
 import Confetti from "react-confetti";
 
 export default function Stats({ todos }) {
+  // Pre-calculate core metrics to keep the render function readable.
   const totalTodos = todos.length;
   const completedTodos = todos.filter((todo) => todo.completed).length;
   const remainingTodos = totalTodos - completedTodos;
   const { width, height } = useWindowSize();
 
+  // Avoid NaN when there are no todos and convert to an integer percentage.
   const completionPercentage = totalTodos > 0 ? Math.round((completedTodos / totalTodos) * 100) : 0;
 
   return (
     <>
+      {/* Celebrate with confetti when everything is done! */}
       {completionPercentage === 100 && (
         <Confetti
           width={width}

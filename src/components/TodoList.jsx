@@ -9,12 +9,15 @@ export default function TodoList({ theme, todos, toggleComplete, deleteTodo, upd
 
   useEffect(() => {
     let result = [...todos];
+
+    // Narrow the list by completion state before sorting it.
     if (filterStatus === "completed") {
       result = result.filter((todo) => todo.completed);
     } else if (filterStatus === "pending") {
       result = result.filter((todo) => !todo.completed);
     }
 
+    // Apply the selected ordering strategy.
     if (sortBy === "dateNew") {
       result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else if (sortBy === "dateOld") {
@@ -89,6 +92,8 @@ export default function TodoList({ theme, todos, toggleComplete, deleteTodo, upd
                 toggleComplete={toggleComplete}
                 deleteTodo={deleteTodo}
                 updateTodo={updateTodo}
+                // Carry the current search phrase so the row can react (e.g., highlight matches).
+                searchTerm={searchTerm}
               />
             </ListGroup.Item>
           ))

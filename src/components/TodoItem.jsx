@@ -3,16 +3,45 @@ import { Link } from "react-router-dom";
 import { FaTrash, FaCheck, FaTimes, FaEdit, FaClock } from "react-icons/fa";
 import { useState } from "react";
 
-export default function TodoItem({ theme, todo, toggleComplete, deleteTodo, updateTodo }) {
+export default function TodoItem({ theme, todo, toggleComplete, deleteTodo, updateTodo, searchTerm }) {
   const [showEdit, setShowEdit] = useState(false);
   const [title, setTitle] = useState(todo.title);
   const [description, setDescription] = useState(todo.description);
 
+  // Preprocess the search term so we can reuse it for lightweight highlighting.
+  const normalizedSearchTerm = searchTerm?.trim().toLowerCase() || "";
+
+  // Escape RegExp meta-characters to prevent invalid expressions when splitting strings.
+  function escapeRegExp(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  // Wrap matching fragments in <mark> tags to visually surface hits.
+  function highlightMatch(text) {
+    if (!normalizedSearchTerm) {
+      return text;
+    }
+
+    const regex = new RegExp(`(${escapeRegExp(normalizedSearchTerm)})`, "gi");
+    return text.split(regex).map((segment, index) => {
+      if (segment.toLowerCase() === normalizedSearchTerm) {
+        return (
+          <mark key={`${segment}-${index}`} className={`bg-${theme}-subtle text-body`}>
+            {segment}
+          </mark>
+        );
+      }
+      return <span key={`${segment}-${index}`}>{segment}</span>;
+    });
+  }
+
+  // Ensure dates are consistently formatted for display.
   function formatDate(createDate) {
     const date = new Date(createDate);
     return date.toLocaleString();
   }
 
+  // Update the todo when the modal form is submitted.
   function submitEdit(event) {
     event.preventDefault();
 
@@ -31,24 +60,33 @@ export default function TodoItem({ theme, todo, toggleComplete, deleteTodo, upda
     setTitle(event.target.value);
   }
 
+  // Reset the form fields when the modal closes to avoid stale data on the next edit.
+  function closeEditModal() {
+    setShowEdit(false);
+    setTitle(todo.title);
+    setDescription(todo.description);
+  }
+
   return (
     <>
       <Row className="align-items-center todo-item-row">
         <Col className="d-flex align-items-start gap-3 flex-grow-1">
+          {/* Completion toggle + task preview */}
           <Button
             size="sm"
             className="todo-status-btn rounded-circle border-0 shadow-sm flex-shrink-0"
             onClick={() => toggleComplete(todo.id)}
+            aria-label={todo.completed ? "Mark todo as pending" : "Mark todo as complete"}
           >
             {todo.completed ? <FaTimes className="opacity-75" /> : <FaCheck />}
           </Button>
           <div className="todo-item-content w-75">
             <Link to={`/task/${todo.id}`} className="todo-item-title d-block text-decoration-none">
-              <div className="fw-semibold text-truncate">{todo.title}</div>
+              <div className="fw-semibold text-truncate">{highlightMatch(todo.title)}</div>
             </Link>
 
             {todo.description && (
-              <div className="todo-item-description text-muted text-truncate">{todo.description}</div>
+              <div className="todo-item-description text-muted text-truncate">{highlightMatch(todo.description)}</div>
             )}
             <div className="mt-2 d-flex align-items-center gap-2 small text-muted">
               <FaClock className="opacity-75" />
@@ -66,7 +104,7 @@ export default function TodoItem({ theme, todo, toggleComplete, deleteTodo, upda
           </Button>
         </Col>
 
-        <Modal show={showEdit} onHide={() => setShowEdit(false)} centered contentClassName="glass-card">
+        <Modal show={showEdit} onHide={closeEditModal} centered contentClassName="glass-card">
           <Modal.Header closeButton>
             <Modal.Title>Edit Task</Modal.Title>
           </Modal.Header>
@@ -100,7 +138,7 @@ export default function TodoItem({ theme, todo, toggleComplete, deleteTodo, upda
               </div>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowEdit(false)}>
+              <Button variant="secondary" onClick={closeEditModal}>
                 Cancel
               </Button>
               <Button type="submit">Save</Button>

@@ -2,9 +2,10 @@ import { Form, Button, InputGroup } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
 
 export default function TodoForm({ title, description, handleTitleChange, handleDescriptionChange, handleSubmit }) {
+  // Render the reusable form that drives todo creation in the sidebar.
   return (
     <Form className="todo-form glass-card p-4 rounded-4 shadow-sm" onSubmit={handleSubmit}>
-      <Form.Group className=" d-flex align-items-center gap-1 mb-3" controlId="todoTitle">
+      <Form.Group className="d-flex align-items-center gap-1 mb-3" controlId="todoTitle">
         <InputGroup.Text className="rounded-pill bg-gradient-blue text-white px-3">Title</InputGroup.Text>
         <Form.Control
           type="text"
@@ -12,9 +13,10 @@ export default function TodoForm({ title, description, handleTitleChange, handle
           value={title}
           onChange={handleTitleChange}
           required
+          // Provide a user-friendly message when the browser flags the field as invalid.
           onInvalid={(event) => {
             if (!event.target.value) {
-              e.target.setCustomValidity("Title is required!");
+              event.target.setCustomValidity("Title is required!");
             }
           }}
           onInput={(event) => event.target.setCustomValidity("")}

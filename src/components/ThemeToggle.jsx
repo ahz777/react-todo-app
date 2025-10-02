@@ -1,6 +1,7 @@
 import { Form, InputGroup, Container } from "react-bootstrap";
 
 export default function ThemeToggle({ theme, changeTheme }) {
+  // Lightweight wrapper around a select control for switching the active visual theme.
   return (
     <Container className="theme-toggle d-flex align-items-center gap-2">
       <InputGroup>

@@ -2,6 +2,7 @@ import { Form, InputGroup } from "react-bootstrap";
 import { FaSearch } from "react-icons/fa";
 
 export default function SearchBar({ value, onChange }) {
+  // Controlled search input that bubbles the updated keyword to parent state.
   return (
     <Form className="search-form">
       <Form.Group controlId="search">

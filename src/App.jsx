@@ -21,6 +21,7 @@ const LOCAL_THEME_KEY = "lt_key";
 const AVAILABLE_THEMES = ["sea", "sky", "galaxy", "desert", "woods"];
 
 export default function App() {
+  // Persist the selected theme or fall back to the default "sea" palette the first time the app loads.
   const [theme, setTheme] = useState(() => {
     const savedTheme = window.localStorage.getItem(LOCAL_THEME_KEY);
     if (savedTheme && AVAILABLE_THEMES.includes(savedTheme)) {
@@ -28,12 +29,17 @@ export default function App() {
     }
     return "sea";
   });
+
+  // Bootstrap the todo list from localStorage so the list survives page reloads.
   const [todos, setTodos] = useState(() => loadTodos(LOCAL_STORAGE_KEY) || []);
+
+  // Form state – stays within the App component so that we can reuse it across the sidebar widgets.
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [titleError, setTitleError] = useState(false);
   const [search, setSearch] = useState("");
 
+  // Memoise filtered todos to keep filtering cheap and avoid recalculations on unrelated updates.
   const filtered = useMemo(() => {
     const searchTerm = search.trim().toLowerCase();
     if (!searchTerm) return todos;
@@ -43,35 +49,43 @@ export default function App() {
     );
   }, [todos, search]);
 
+  // Apply validated themes and keep the DOM + localStorage in sync.
   function changeTheme(newTheme) {
     if (AVAILABLE_THEMES.includes(newTheme)) {
       setTheme(newTheme);
     }
   }
+
+  // Store the chosen theme and update the body to allow Bootstrap to target the active theme.
   useEffect(() => {
     window.localStorage.setItem(LOCAL_THEME_KEY, theme);
     document.body.setAttribute("data-bs-theme", theme);
   }, [theme]);
 
+  // Persist todos on every change so the list is always up-to-date across refreshes.
   useEffect(() => {
     saveTodos(LOCAL_STORAGE_KEY, todos);
   }, [todos]);
 
+  // Append a new todo to the existing list while maintaining immutability.
   function addTodo(todo) {
     let newTodos = [...todos];
     newTodos.push(todo);
     setTodos(newTodos);
   }
 
+  // Reset the title error indicator when the user resumes typing.
   function handleTitleChange(event) {
     setTitle(event.target.value);
     if (titleError) setTitleError(false);
   }
 
+  // Keep the description field controlled for consistency with the title input.
   function handleDescriptionChange(event) {
     setDescription(event.target.value);
   }
 
+  // Validate and create a new todo item when the form is submitted.
   function handleSubmit(event) {
     event.preventDefault();
     if (!title.trim()) {
@@ -93,14 +107,17 @@ export default function App() {
     setTitleError(false);
   }
 
+  // Toggle the completion state by id; performed immutably for React reconciliation.
   function toggleComplete(id) {
     setTodos((prev) => prev.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)));
   }
 
+  // Remove an item from the list based on its identifier.
   function deleteTodo(id) {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   }
 
+  // Update todo fields without mutating the original object.
   function updateTodo(id, updatedFields) {
     setTodos((prev) => prev.map((todo) => (todo.id === id ? { ...todo, ...updatedFields } : todo)));
   }

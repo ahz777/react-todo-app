@@ -2,6 +2,7 @@ import { Navbar, Container, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 export default function NavBar({ children }) {
+  // Render the application shell header with navigation and injected utilities (theme switcher, etc.).
   return (
     <Navbar className="mt-3 border-0 glass-card rounded-4">
       <Container className="d-flex flex-wrap gap-3 justify-content-between align-items-center">
