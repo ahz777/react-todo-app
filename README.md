@@ -2,6 +2,10 @@
 
 A modern, responsive, and theme-aware todo application built with React and Vite. It features task management, real-time filtering, detailed task views, and local data persistence.
 
+## Live Demo
+
+Access the deployed application here: [React Todo App Live Demo](https://lightslategrey-cheetah-195092.hostingersite.com/)
+
 ## Features
 
 - **Task Management**: Create, edit, mark complete, or delete tasks with ease.
